@@ -384,3 +384,300 @@ hi tom
 hi bob
 2 instances
 ```
+
+# アクセス制限をしてみよう
+
+python3 では private のような修飾子は存在しないが、フィールド名の前にに `_` をつけることであたかも private で扱うような慣習が存在する
+
+```python
+class User:
+    count = 0
+    def __init__(self, name):
+        User.count += 1
+        self._name = name
+    # instance method
+    def say_hi(self):
+        print("hi {0}".format(self.name))
+    
+    # class method
+    @classmethod
+    def show_info(cls):
+        print("{0} instances".format(cls.count))
+
+bob = User("bob")
+print(bob._name)
+```
+
+しかし慣習なので実際にはアクセスできてしまう
+```shell
+bob
+```
+
+アクセスを制限するにはフィールド名の前に `__` をつけることで実現できるのだが、例外が存在する
+
+```python
+class User:
+    count = 0
+    def __init__(self, name):
+        User.count += 1
+        self.__name = name
+    # instance method
+    def say_hi(self):
+        print("hi {0}".format(self.name))
+    
+    # class method
+    @classmethod
+    def show_info(cls):
+        print("{0} instances".format(cls.count))
+
+bob = User("bob")
+# print(bob.__name) エラーが発生する
+print(bob._User__name) # bob
+```
+instance._<Class名>__<field名> でたとえフィールド名に`__`がついていてもアクセスできてしまう
+
+実行結果
+```
+bob
+```
+
+# クラスを継承してみよう
+
+クラスの継承は以下のように実装する。またメソッドのオーバーライドも可能
+```python
+class User:
+    count = 0
+    def __init__(self, name):
+        User.count += 1
+        self.__name = name
+    # instance method
+    def say_hi(self):
+        print("hi {0}".format(self.__name))
+
+class AdminUser(User):
+    def __init__(self, name, age):
+        super().__init__(name)
+        self.age = age
+
+    def say_hello(self):
+        # 親クラスのprivate?フィールドを参照するには_<親クラス>__<field>と記述する
+        print("hello {0} ({1})".format(self._User__name, self.age))
+    
+    # override
+    def say_hi(self):
+        print("hi {0}".format(self.__name))
+
+bob = AdminUser("bob", 23)
+bob.say_hello()
+```
+
+実行結果
+```shell
+hello bob (23)
+```
+
+# クラスの多重継承について
+
+python3 ではクラスの多重継承が可能。え
+```python
+class A:
+    def say_a(self):
+        print("A!")
+    def say_hi(self):
+        print("hi! from A!")
+
+class B:
+    def say_b(self):
+        print("B!")
+    def say_hi(self):
+        print("hi! from B!")
+
+class C(A, B):
+    pass
+
+c = C()
+c.say_a()
+c.say_b()
+c.say_hi() # 同じメソッドが存在した場合は継承の際に先に指定されたクラスのメソッドが呼ばれる
+```
+
+実行結果
+```
+A!
+B!
+hi! from A!
+```
+
+# モジュールによるファイル分割
+
+```shell
+$ tree
+├── sample.py
+└── user.py
+```
+
+user.py
+```python
+class User:
+    count = 0
+    def __init__(self, name):
+        User.count += 1
+        self.__name = name
+    # instance method
+    def say_hi(self):
+        print("hi {0}".format(self.__name))
+
+class AdminUser(User):
+    def __init__(self, name, age):
+        super().__init__(name)
+        self.age = age
+
+    def say_hello(self):
+        print("hello {0} ({1})".format(self._User__name, self.age))
+    
+    # override
+    def say_hi(self):
+        print("hi {0}".format(self._User__name))
+
+def say_hi_global():
+    print("HELLO, GLOBAL")
+```
+
+sample.py
+```python
+# ファイル全体を import したい時
+# import user
+
+# ファイル内の特定のモジュールを import したい時
+from user import User, AdminUser, say_hi_global #クラスだけでなくメソッドも import できる
+
+class A:
+    def say_a(self):
+        print("A!")
+    def say_hi(self):
+        print("hi! from A!")
+
+class B:
+    def say_b(self):
+        print("B!")
+    def say_hi(self):
+        print("hi! from B!")
+
+class C(A, B):
+    pass
+
+bob = AdminUser("bob", 24)
+bob.say_hello()
+say_hi_global()
+```
+
+```shell
+$ python3 sample.py
+hello bob (24)
+HELLO, GLOBAL
+```
+
+# パッケージを利用したモジュール管理
+
+ファイルが複数になってくるとそれを逐一 import するのは手間がかかるので、パッケージを使って使用するモジュールを import しやすくする。今回は`mypackage`配下のモジュールを import してみる  
+ファイル構成は以下の通り
+```shell
+$ tree
+.
+├── README.md
+├── __pycache__
+│   └── user.cpython-37.pyc
+├── mypackage
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-37.pyc
+│   │   └── user.cpython-37.pyc
+│   └── user.py
+└── sample.py
+```
+__init__.py に関してはパッケージを作る上で必要なファイルとなるが、内容自体は何も書かなくてよい(なくても動いたけど...)
+
+```python
+# mypackage/user.py を import する
+# import mypackage.user
+
+# モジュールに別名をつける
+# import mypackage.user as mymodule
+
+# 特定のモジュールのみ import 
+from mypackage.user import AdminUser, say_hi_global
+
+class A:
+    def say_a(self):
+        print("A!")
+    def say_hi(self):
+        print("hi! from A!")
+
+class B:
+    def say_b(self):
+        print("B!")
+    def say_hi(self):
+        print("hi! from B!")
+
+class C(A, B):
+    pass
+
+bob = AdminUser("bob", 24)
+bob.say_hello()
+say_hi_global()
+```
+user.py の内容は前項と同じであるため省略
+
+```shell
+$ python3 sample.py
+hello bob (24)
+HELLO, GLOBAL
+```
+
+# 例外処理の実装方法
+
+例外処理はJavaと似ている
+```python
+# (1)
+class MyException(Exception):
+    pass
+
+def div(a, b):
+    try: # (2)
+        if (b < 0):
+            raise MyException("not minus") # (3)
+        print(a/b)
+    except ZeroDivisionError: # (4)
+        print("not by zero!")
+    except MyException as e: # (5)
+        print(e)
+    else:
+        print("no exception!") # (6)
+    finally:
+        print("-- end --") # (7)
+
+div(10, 3)
+div(10, 0)
+div(10, -1)
+```
+
+| No | 内容 |
+|:----:|-----|
+|(1)|例外を自作する場合は Exception を継承する|
+|(2)|tryで例外処理を始める|
+|(3)|例外を発生させる場合は `raise` を使う。またコンストラクタの引数はエラーメッセージ|
+|(4)|例外を捉えるには`except`を使う|
+|(5)|捉えた例外は変数として宣言できる|
+|(6)|例外が発生せずに処理が完了したのちに呼ばれる|
+|(7)|例外の発生の有無に関わらずに実行される|
+
+実行結果
+```shell
+3.3333333333333335
+no exception!
+-- end --
+division by zero
+-- end --
+not minus
+-- end --
+```

@@ -1,20 +1,27 @@
-class User:
-    count = 0
-    def __init__(self, name):
-        User.count += 1
-        self.name = name
-    # instance method
+# mypackage/user.py を import する
+# import mypackage.user
+
+# モジュールに別名をつける
+# import mypackage.user as mymodule
+
+# 特定のモジュールのみ import 
+from mypackage.user import AdminUser, say_hi_global
+
+class A:
+    def say_a(self):
+        print("A!")
     def say_hi(self):
-        print("hi {0}".format(self.name))
-    
-    # class method
-    @classmethod
-    def show_info(cls):
-        print("{0} instances".format(cls.count))
+        print("hi! from A!")
 
-tom = User("tom")
-bob = User("bob")
+class B:
+    def say_b(self):
+        print("B!")
+    def say_hi(self):
+        print("hi! from B!")
 
-tom.say_hi()
-bob.say_hi()
-User.show_info()
+class C(A, B):
+    pass
+
+bob = AdminUser("bob", 24)
+bob.say_hello()
+say_hi_global()
