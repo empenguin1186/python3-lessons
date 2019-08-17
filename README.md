@@ -841,9 +841,9 @@ print(list(filter(lambda n: n % 2 == 0, range(10))))
 集合に関しては様々な記法が存在する
 ```py
 # i: [0,10)
-print([i for i in range(10)])
-print([i * 3 for i in range(10)])
-print([i * 3 for i in range(10) if i % 2 == 0])
-print(list(i * 3 for i in range(10) if i % 2 == 0))
-print({i * 3 for i in range(10) if i % 2 == 0})
+print([i for i in range(10)]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+print([i * 3 for i in range(10)]) # [0, 3, 6, 9, 12, 15, 18, 21, 24, 27]
+print([i * 3 for i in range(10) if i % 2 == 0]) # [0, 6, 12, 18, 24]
+print(list(i * 3 for i in range(10) if i % 2 == 0)) # [0, 6, 12, 18, 24]
+print({i * 3 for i in range(10) if i % 2 == 0}) # {0, 6, 12, 18, 24}
 ```
