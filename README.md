@@ -681,3 +681,169 @@ division by zero
 not minus
 -- end --
 ```
+
+# リスト型
+
+```py
+hoge = [40, 50]
+
+# 要素数
+print(len(hoge)) # 2
+
+# 要素追加
+hoge.append(1000)
+print(len(hoge)) # 3
+
+# for 文との併用
+for el in hoge:
+    print(el)
+
+# enumerate によるインデックスの取得
+for i, el in enumerate(hoge):
+    print("{0}: {1}".format(i, el))
+```
+
+# タプル
+
+```py
+hoge = (10, "foo", 33.4)
+print(hoge[1])
+
+# 値の再代入は不可能
+hoge[1] = 50
+
+# tuple -> list
+fuga = list((10, 20, 30))
+
+# list -> tuple
+piyo = tuple(["one", "two", "three"])
+```
+
+# リストのスライス
+
+```py
+hoge = ["one", "two", "three", "four", "five"]
+
+print(hoge[2:]) # ["three", "four", "five"]
+print(hoge[:2]) # ["one", "two"]
+print(hoge[1:4]) # ["two", "three", "four"]
+print(hoge[-2:]) # ["four", "five"]
+
+fuga = "happy"
+print(fuga[1:]) # appy
+```
+
+# 集合型
+
+```py
+hoge = {1, 2, 3, 1}
+print(hoge)
+print(2 in hoge)
+
+# 値追加&削除
+hoge.add(4)
+hoge.remove(1)
+print(len(hoge))
+print(hoge)
+
+fuga = {4, 5, 6}
+
+# 和集合
+print(hoge | fuga)
+
+# 積集合
+print(hoge & fuga)
+
+# 差集合
+print(hoge - fuga)
+```
+
+# 辞書型
+
+```py
+# 定義
+hoge = {"foo": 200, "bar": 400}
+print(hoge["foo"])
+
+# 値の更新は可能
+hoge["foo"] = 300
+
+# 追加&削除も可能
+hoge["baz"] = 500
+del(hoge["bar"])
+
+print(hoge)
+
+# ループ処理では items() 関数で key, value の値を取得することが可能
+for key, value in hoge.items():
+    print("{0}: {1}".format(key, value))
+```
+
+# イテレータ
+
+```py
+hoge = [40, 50, 70, 90, 60]
+
+it = iter(hoge)
+
+print(next(it)) # 40
+print(next(it)) # 50
+print("foo")
+print(next(it)) # 70
+
+# iterator を返すジェネレータオブジェクトを作成することが可能
+def get_index():
+    i = 0
+    while True:
+        yield i * 2
+        i += 1
+
+for el in get_index():
+    if el == 10:
+        break
+    else:
+        print(el)
+```
+
+# map, lambda
+
+```py
+def double(n):
+    return n * 2;
+
+# map(適用させたい関数, 適用対象のイテレータ) で各要素に処理を施し、ジェネレータを返す
+print(list(map(double, [1,2,3])))
+
+# lambda で Java の無名関数っぽい書き方ができる
+print(list(map(lambda n: n * 2, [1,2,3])))
+
+# ジェネレータを返すので for 文などで応用することが可能
+for i in map(double, [2,3,4]):
+    print(i)
+```
+
+# filter
+
+```py
+# filter(関数, イテレータ) で条件にマッチした要素を取り出すことが可能
+
+def even(n):
+    return n % 2 == 0
+
+print(list(filter(even, range(10))))
+
+# lambda を使用した書き方
+print(list(filter(lambda n: n % 2 == 0, range(10))))
+```
+
+# 内包表記
+
+集合に関しては様々な記法が存在する
+```py
+# i: [0,10)
+print([i for i in range(10)])
+print([i * 3 for i in range(10)])
+print([i * 3 for i in range(10) if i % 2 == 0])
+print(list(i * 3 for i in range(10) if i % 2 == 0))
+print({i * 3 for i in range(10) if i % 2 == 0})
+```
